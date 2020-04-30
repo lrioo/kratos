@@ -10,16 +10,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/conf/dsn"
-	"github.com/bilibili/kratos/pkg/log"
-	nmd "github.com/bilibili/kratos/pkg/net/metadata"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/ratelimiter"
-	"github.com/bilibili/kratos/pkg/net/trace"
-	xtime "github.com/bilibili/kratos/pkg/time"
+	"github.com/go-kratos/kratos/pkg/conf/dsn"
+	"github.com/go-kratos/kratos/pkg/log"
+	nmd "github.com/go-kratos/kratos/pkg/net/metadata"
+	"github.com/go-kratos/kratos/pkg/net/rpc/warden/ratelimiter"
+	"github.com/go-kratos/kratos/pkg/net/trace"
+	xtime "github.com/go-kratos/kratos/pkg/time"
 
 	//this package is for json format response
-	_ "github.com/bilibili/kratos/pkg/net/rpc/warden/internal/encoding/json"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/internal/status"
+	_ "github.com/go-kratos/kratos/pkg/net/rpc/warden/internal/encoding/json"
+	"github.com/go-kratos/kratos/pkg/net/rpc/warden/internal/status"
 
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -36,7 +36,7 @@ var (
 		Network:           "tcp",
 		Addr:              "0.0.0.0:9000",
 		Timeout:           xtime.Duration(time.Second),
-		IdleTimeout:       xtime.Duration(time.Second * 60),
+		IdleTimeout:       xtime.Duration(time.Second * 180),
 		MaxLifeTime:       xtime.Duration(time.Hour * 2),
 		ForceCloseWait:    xtime.Duration(time.Second * 20),
 		KeepAliveInterval: xtime.Duration(time.Second * 60),

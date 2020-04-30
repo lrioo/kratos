@@ -13,12 +13,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/conf/dsn"
-	"github.com/bilibili/kratos/pkg/log"
-	"github.com/bilibili/kratos/pkg/net/criticality"
-	"github.com/bilibili/kratos/pkg/net/ip"
-	"github.com/bilibili/kratos/pkg/net/metadata"
-	xtime "github.com/bilibili/kratos/pkg/time"
+	"github.com/go-kratos/kratos/pkg/conf/dsn"
+	"github.com/go-kratos/kratos/pkg/log"
+	"github.com/go-kratos/kratos/pkg/net/criticality"
+	"github.com/go-kratos/kratos/pkg/net/ip"
+	"github.com/go-kratos/kratos/pkg/net/metadata"
+	xtime "github.com/go-kratos/kratos/pkg/time"
 
 	"github.com/pkg/errors"
 )
@@ -91,8 +91,7 @@ func (engine *Engine) Start() error {
 	conf := engine.conf
 	l, err := net.Listen(conf.Network, conf.Addr)
 	if err != nil {
-		errors.Wrapf(err, "blademaster: listen tcp: %s", conf.Addr)
-		return err
+		return errors.Wrapf(err, "blademaster: listen tcp: %s", conf.Addr)
 	}
 
 	log.Info("blademaster: start http listen addr: %s", conf.Addr)
@@ -245,8 +244,8 @@ func (engine *Engine) prepareHandler(c *Context) {
 	httpMethod := c.Request.Method
 	rPath := c.Request.URL.Path
 	unescape := false
-	if engine.UseRawPath && len(c.Request.URL.RawPath) > 0 {
-		rPath = c.Request.URL.RawPath
+	if engine.UseRawPath && len(c.Request.URL.EscapedPath()) > 0 {
+		rPath = c.Request.URL.EscapedPath()
 		unescape = engine.UnescapePathValues
 	}
 	rPath = cleanPath(rPath)

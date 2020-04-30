@@ -179,7 +179,7 @@ func (f *file) reloadFile(name string) {
 	}
 	// NOTE: in some case immediately read file content after receive event
 	// will get old content, sleep 100ms make sure get correct content.
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	key := filepath.Base(name)
 	val, err := loadValue(name)
 	if err != nil {
@@ -195,7 +195,7 @@ func (f *file) reloadFile(name string) {
 
 	for _, ch := range chs {
 		select {
-		case ch <- Event{Event: EventUpdate, Value: val.raw}:
+		case ch <- Event{Event: EventUpdate, Key: key, Value: val.raw}:
 		default:
 			log.Printf("event channel full discard file %s update event", name)
 		}

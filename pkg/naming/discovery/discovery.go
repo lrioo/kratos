@@ -13,12 +13,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/conf/env"
-	"github.com/bilibili/kratos/pkg/ecode"
-	"github.com/bilibili/kratos/pkg/log"
-	"github.com/bilibili/kratos/pkg/naming"
-	http "github.com/bilibili/kratos/pkg/net/http/blademaster"
-	xtime "github.com/bilibili/kratos/pkg/time"
+	"github.com/go-kratos/kratos/pkg/conf/env"
+	"github.com/go-kratos/kratos/pkg/ecode"
+	"github.com/go-kratos/kratos/pkg/log"
+	"github.com/go-kratos/kratos/pkg/naming"
+	http "github.com/go-kratos/kratos/pkg/net/http/blademaster"
+	xtime "github.com/go-kratos/kratos/pkg/time"
 )
 
 const (
@@ -276,9 +276,18 @@ func (r *Resolve) Fetch(ctx context.Context) (ins *naming.InstancesInfo, ok bool
 	app, ok := r.d.apps[r.id]
 	r.d.mutex.RUnlock()
 	if ok {
-		ins, ok = app.zoneIns.Load().(*naming.InstancesInfo)
+		var appIns *naming.InstancesInfo
+		appIns, ok = app.zoneIns.Load().(*naming.InstancesInfo)
+		ins = new(naming.InstancesInfo)
+		ins.LastTs = appIns.LastTs
+		ins.Scheduler = appIns.Scheduler
 		if r.opt.Filter != nil {
-			ins.Instances = r.opt.Filter(ins.Instances)
+			ins.Instances = r.opt.Filter(appIns.Instances)
+		} else {
+			ins.Instances = make(map[string][]*naming.Instance)
+			for zone, in := range appIns.Instances {
+				ins.Instances[zone] = in
+			}
 		}
 		if r.opt.Scheduler != nil {
 			ins.Instances[r.opt.ClientZone] = r.opt.Scheduler(ins)
@@ -601,7 +610,9 @@ func (d *Discovery) polls(ctx context.Context) (apps map[string]*naming.Instance
 	}
 	if err = d.httpClient.Get(ctx, uri, "", params, res); err != nil {
 		d.switchNode()
-		log.Error("discovery: client.Get(%s) error(%+v)", uri+"?"+params.Encode(), err)
+		if ctx.Err() != context.Canceled {
+			log.Error("discovery: client.Get(%s) error(%+v)", uri+"?"+params.Encode(), err)
+		}
 		return
 	}
 	if ec := ecode.Int(res.Code); !ecode.Equal(ecode.OK, ec) {
